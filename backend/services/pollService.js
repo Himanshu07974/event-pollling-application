@@ -66,4 +66,10 @@ const getResults = async (pollId) => {
   return poll;
 };
 
-module.exports = { createPoll, vote, getResults };
+const getPollById = async (pollId) => {
+  return Poll.findById(pollId)
+    .populate('createdBy', 'name email')
+    .populate('options.votes', 'name email') // only if votes are refs to User
+    .lean();
+};
+module.exports = { createPoll, vote, getResults,getPollById };

@@ -34,17 +34,27 @@ const vote = async (req, res, next) => {
   }
 };
 
-// 🔹 Get Poll Results
+//  Get Poll Results
 const getResults = async (req, res, next) => {
   try {
     const { pollId } = req.params;
+    const compact = req.query.compact === 'true';
 
-    const poll = await pollService.getResults(pollId);
+    const poll = await pollService.getPollById(pollId);
+    if (!poll) return res.status(404).json({ message: 'Poll not found' });
 
+    if (compact) {
+      const compactOptions = poll.options.map(opt => ({
+        text: opt.text,
+        count: Array.isArray(opt.votes) ? opt.votes.length : 0
+      }));
+      return res.json({ poll: { _id: poll._id, question: poll.question, options: compactOptions } });
+    }
     return res.json({ poll });
   } catch (err) {
     next(err);
   }
 };
+
 
 module.exports = { createPoll, vote, getResults };
