@@ -10,7 +10,7 @@ import Invitations from "./pages/Invitations/Invitations";
 import EventDetail from "./pages/Events/EventDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useLocation } from "react-router-dom";
-
+import CreateEvent from "./pages/Events/CreateEvent";
 const Layout = ({ children }) => {
   const location = useLocation();
   const noSidebarRoutes = ["/login", "/signup"];
@@ -59,6 +59,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/create-event"
+  element={
+    <ProtectedRoute>
+      <CreateEvent />
+    </ProtectedRoute>
+  }
+/>
       </Routes>
     </Layout>
   );
