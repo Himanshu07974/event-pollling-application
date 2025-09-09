@@ -60,13 +60,13 @@ function AppRoutes() {
           }
         />
         <Route
-  path="/create-event"
-  element={
-    <ProtectedRoute>
-      <CreateEvent />
-    </ProtectedRoute>
-  }
-/>
+          path="/create-event"
+          element={
+            <ProtectedRoute>
+              <CreateEvent />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Layout>
   );
