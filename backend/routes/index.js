@@ -8,6 +8,6 @@ const invitationRoutes = require('./invitationRoutes');
 router.use('/auth', authRoutes);
 router.use('/events', eventRoutes);
 router.use('/polls', pollRoutes);  
-router.use('/', invitationRoutes)
+router.use('/invitations', invitationRoutes);
 router.use("/users", require("./userRoutes"));
 module.exports = router;

@@ -1,50 +1,62 @@
-import React, { useEffect, useState } from "react";
-import API from "../../api/axios";
+// frontend/src/pages/InvitedEvents.js
+import React, { useEffect, useState } from 'react';
+import API from '../../api/axios';
 
-const Invitations = () => {
+export default function InvitedEvents() {
   const [invitations, setInvitations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
-        const res = await API.get("/invitations");
+        const res = await API.get('/invitations');
+        console.log('Invitations API response:', res.data); // <-- important debug log
         setInvitations(res.data.invitations || []);
-      } catch (err) {
-        console.error(err);
+      } catch (e) {
+        console.error('Failed to fetch invitations', e);
+        setErr(e.response?.data?.message || 'Failed to load invitations');
+      } finally {
+        setLoading(false);
       }
     };
-    fetch();
+    load();
   }, []);
 
-  const respond = async (id, status) => {
-    try {
-      await API.post(`/invitations/${id}/respond`, { status });
-      setInvitations((s) => s.filter(i => i._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  if (loading) return <div>Loading invitations…</div>;
+  if (err) return <div className="text-red-600">{err}</div>;
+  if (!invitations || invitations.length === 0) return <div>No invitations</div>;
 
   return (
-    <div className="flex-1 p-8">
-      <h1 className="text-2xl font-semibold mb-6">Invitations</h1>
-      <div className="space-y-4">
-        {invitations.map(inv => (
-          <div key={inv._id} className="bg-white p-4 rounded shadow border flex justify-between items-center">
-            <div>
-              <div className="font-medium">{inv.event.title}</div>
-              <div className="text-sm text-slate-600">{inv.message}</div>
+    <div className="space-y-4 p-6">
+      {invitations.map(inv => {
+        const ev = inv.event || {};
+        const from = inv.from || {};
+        return (
+          <div key={inv._id} className="p-4 border rounded bg-white">
+            <h3 className="text-lg font-semibold">{ev.title || 'Untitled event'}</h3>
+            <p className="text-sm text-gray-600">{ev.description || 'No description'}</p>
+
+            <div className="mt-2 text-xs text-gray-500">
+              From: {from.name ? `${from.name} (${from.email})` : (inv.from || 'Unknown')}
             </div>
-            <div className="flex gap-2">
-              <button onClick={()=>respond(inv._id,"accepted")} className="px-3 py-1 bg-green-600 text-white rounded">Accept</button>
-              <button onClick={()=>respond(inv._id,"declined")} className="px-3 py-1 bg-red-50 text-red-600 rounded border">Decline</button>
+
+            <div className="mt-2 text-sm">
+              Status: <strong>{inv.status || 'pending'}</strong>
+            </div>
+
+            <div className="mt-3">
+              <button
+                onClick={() => window.location.assign(`/events/${ev._id || inv.event}`)}
+                className="px-3 py-1 bg-blue-600 text-white rounded"
+              >
+                View
+              </button>
             </div>
           </div>
-        ))}
-        {invitations.length === 0 && <div className="text-slate-500">No invitations</div>}
-      </div>
+        );
+      })}
     </div>
   );
-};
-
-export default Invitations;
+}
