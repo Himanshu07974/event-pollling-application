@@ -51,4 +51,9 @@ router.get('/mine', authMiddleware, eventController.getMyEvents);
 // GET /api/events/invited
 router.get('/invited', authMiddleware, eventController.getInvitedEvents);
 
+// IMPORTANT: the param route must be AFTER more specific routes like /mine and /invited
+// Get event by ID (creator or invitee)
+// GET /api/events/:id
+router.get('/:id', authMiddleware, eventController.getEventById);
+
 module.exports = router;
