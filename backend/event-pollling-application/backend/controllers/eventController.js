@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const eventService = require('../services/eventService');
 const Event = require('../models/Event');
+
 // Create Event
 const createEvent = async (req, res, next) => {
   try {
@@ -10,7 +11,13 @@ const createEvent = async (req, res, next) => {
     const { title, description, dateOptions, participants } = req.body;
     const creator = req.userId;
 
-    const event = await eventService.createEvent({ title, description, dateOptions, participants, creator });
+    const event = await eventService.createEvent({
+      title,
+      description,
+      dateOptions,
+      participants,
+      creator
+    });
     return res.status(201).json({ event });
   } catch (err) {
     next(err);
@@ -57,6 +64,37 @@ const getInvitedEvents = async (req, res, next) => {
   }
 };
 
+// Get Event By ID
+const getEventById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const event = await Event.findById(id)
+      .populate('participants', '_id name email')
+      .populate('creator', '_id name email');
 
+    if (!event) return res.status(404).json({ message: 'Event not found' });
 
-module.exports = { createEvent, updateEvent, deleteEvent, getMyEvents, getInvitedEvents };
+    const requesterId = req.userId; // from authMiddleware
+    const isCreator = event.creator && String(event.creator._id) === String(requesterId);
+    const isParticipant = (event.participants || []).some(
+      (p) => String(p._id) === String(requesterId)
+    );
+
+    if (!isCreator && !isParticipant) {
+      return res.status(403).json({ message: 'Not authorized to view this event' });
+    }
+
+    res.json({ event });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getMyEvents,
+  getInvitedEvents,
+  getEventById
+};
